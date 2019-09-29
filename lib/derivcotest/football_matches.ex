@@ -85,14 +85,14 @@ defmodule Derivcotest.FootballMatches do
   @spec grouper([List.t()], Map.t()) :: [Tuple.t()]
   def grouper(rows, opts) do
     case Map.get(opts, "group_by") do
-      ["division"] ->
-        Enum.group_by(rows, fn %{:division => division} -> division end)
-      ["season"] ->
-        Enum.group_by(rows, fn %{:season => season} -> season end)
-      ["season", "divison"] ->
+      ["season", "divison" | _] ->
         Enum.group_by(rows, fn %{:division => division, :season => season} -> "#{season} #{division}" end)
-      ["division", "season"] ->
+      ["division", "season" | _] ->
         Enum.group_by(rows, fn %{:division => division, :season => season} -> "#{division} #{season}" end)
+      ["division" | _] ->
+        Enum.group_by(rows, fn %{:division => division} -> division end)
+      ["season" | _] ->
+        Enum.group_by(rows, fn %{:season => season} -> season end)
       _ -> rows
     end
   end
