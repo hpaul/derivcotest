@@ -67,16 +67,23 @@ defmodule Derivcotest.FootballMatches do
   @doc """
   Filter rows which contain selected params data
   ex. Season: 201517
+
+  Downside:
+  For more params this method of matching fields fails
+
+  It can be extended to dynamically match keyword tuples using `:ets.select`
+  With a little meta-programming
+  Same applies for group_by by params
   """
   @spec filter(Map.t()) :: [Tuple.t()]
+  def filter(%{"division" => division, "season" => season}) do
+    :ets.match_object(:games, {division,season,:_,:_,:_,:_,:_,:_,:_,:_,:_})
+  end
   def filter(%{"division" => division}) do
     :ets.match_object(:games, {division,:_, :_,:_,:_, :_,:_,:_,:_,:_,:_})
   end
   def filter(%{"season" => season}) do
     :ets.match_object(:games, {:_,season,:_,:_,:_,:_,:_,:_,:_,:_,:_})
-  end
-  def filter(%{"division" => division, "season" => season}) do
-    :ets.match_object(:games, {division,season,:_,:_,:_,:_,:_,:_,:_,:_,:_})
   end
   def filter(%{}) do
     :ets.match_object(:games, {:_,:_,:_,:_,:_,:_,:_,:_,:_,:_,:_})
@@ -85,10 +92,10 @@ defmodule Derivcotest.FootballMatches do
   @spec grouper([List.t()], Map.t()) :: [Tuple.t()]
   def grouper(rows, opts) do
     case Map.get(opts, "group_by") do
-      ["season", "divison" | _] ->
-        Enum.group_by(rows, fn %{:division => division, :season => season} -> "#{season} #{division}" end)
       ["division", "season" | _] ->
         Enum.group_by(rows, fn %{:division => division, :season => season} -> "#{division} #{season}" end)
+      ["season", "divison" | _] ->
+        Enum.group_by(rows, fn %{:division => division, :season => season} -> "#{season} #{division}" end)
       ["division" | _] ->
         Enum.group_by(rows, fn %{:division => division} -> division end)
       ["season" | _] ->

@@ -23,6 +23,25 @@ defmodule Derivcotest.Router do
 
   ## GET /proto/games
   This endpoint return a Protocol Buffer response
+  Accept same params as `/api/games` endpoint
+  Protocol file and can be found in `lib/proto/messages.proto`
+
+  ex. GET /api/games?division=SP1&season=201617
+
+    message Response {
+      repeated FootballMatch games = 2;
+    }
+
+  ex. GET/api/games?group_by=division
+
+    message GroupResponse {
+      message GroupMatches {
+        string name = 1;
+        Response list = 2;
+      }
+
+      repeated GroupMatches groups = 1;
+    }
   """
 
   plug(Plug.Logger, log: :debug)
