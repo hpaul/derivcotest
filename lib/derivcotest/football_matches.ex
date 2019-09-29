@@ -27,6 +27,8 @@ defmodule Derivcotest.FootballMatches do
   require Logger
   require IEx
 
+  alias Derivcotest.Messages
+
   @columns [:division,:season,:date,:home_team,:away_team,:fthg,:ftah,:ftr,:hthg,:htag,:htr]
 
   def import do
@@ -46,6 +48,13 @@ defmodule Derivcotest.FootballMatches do
     filter(opts)
       |> Enum.map(&build_row/1)
       |> grouper(opts)
+  end
+
+  def get_proto(opts) do
+    data = get(opts)
+      |> to_proto_response
+
+    {:ok, data}
   end
 
   defp build_row(row) do
@@ -86,6 +95,33 @@ defmodule Derivcotest.FootballMatches do
         Enum.group_by(rows, fn %{:division => division, :season => season} -> "#{division} #{season}" end)
       _ -> rows
     end
+  end
+
+  @spec to_proto_response(%{ String.t() => List.t() }) :: binary
+  defp to_proto_response(groups) when is_map(groups) do
+    groups = Enum.map(groups, fn {name, games} ->
+      Messages.GroupMatches.new(%{
+        name: name,
+        list: games_to_proto(games)
+      })
+    end)
+
+    Messages.GroupResponse.encode(
+      Messages.GroupResponse.new(%{
+        groups: groups
+      })
+    )
+  end
+
+  @spec to_proto_response([Map.t()]) :: binary
+  defp to_proto_response(rows) when is_list(rows) do
+    Messages.Response.encode(games_to_proto(rows))
+  end
+
+  defp games_to_proto(rows) do
+    Messages.Response.new(%{
+      games: rows |> Enum.map(&Messages.FootballMatch.new/1)
+    })
   end
 
   # @spec get(Map.t(), [String.t()]) :: [Map.t()]

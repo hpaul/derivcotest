@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package derivco;
+
+message FootballMatch {
+    enum Result {
+        H = 0;
+        D = 1;
+        A = 3;
+    }
+
+    string division = 1;
+    string season = 2;
+    string date = 3;
+
+    string home_team = 4;
+    string away_team = 5;
+
+    string fthg = 6;
+    string ftag = 7;
+    string ftr = 9;
+
+    string hthg = 10;
+    string htag = 11;
+    string htr = 12;
+}
+
+message Response {
+    repeated FootballMatch games = 2;
+}
+
+message GroupMatches {
+    string name = 1;
+    Response list = 2;
+}
+
+message GroupResponse {
+    repeated GroupMatches groups = 1;
+}

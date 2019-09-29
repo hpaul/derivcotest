@@ -47,7 +47,7 @@ defmodule Derivcotest.Router do
     else
       {:error, message} ->
         IO.inspect(message)
-        send_resp(conn, 500, "Bad things happens")
+        send_resp(conn, 500, "Bad things happens...\ncheckout server logs")
     end
   end
 
@@ -63,10 +63,13 @@ defmodule Derivcotest.Router do
         params -> params
       end
 
-    {:ok, data} =
-      FootballMatches.get_proto(filters)
-
-    send_resp(conn, 200, data)
+    with {:ok, data} <- FootballMatches.get_proto(filters) do
+      send_resp(conn, 200, data)
+    else
+      {:error, message} ->
+        IO.inspect(message)
+        send_resp(conn, 500, "Bad things happens...\ncheckout server logs")
+    end
   end
 
   match _ do
