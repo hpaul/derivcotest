@@ -15,7 +15,7 @@ defmodule Derivcotest.MixProject do
   def application do
     [
       mod: {Derivcotest.App, []},
-      applications: [:mnesia, :plug, :cowboy, :exprotobuf],
+      applications: [:plug_cowboy, :poison, :cowboy, :exprotobuf],
       extra_applications: [:logger]
     ]
   end

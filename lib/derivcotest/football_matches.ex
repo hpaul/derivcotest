@@ -43,18 +43,18 @@ defmodule Derivcotest.FootballMatches do
   Build the structure for each row and "group_by" params requested
   Group them by division or season or both
   """
-  @spec get(Map.t()) :: [Map.t()]
-  def get(opts) do
-    filter(opts)
+  @spec get(Map.t(), :json | :protobuf) :: {:ok, [Map.t()]}
+  def get(opts, type) do
+    data =
+      filter(opts)
       |> Enum.map(&build_row/1)
       |> grouper(opts)
-  end
 
-  def get_proto(opts) do
-    data = get(opts)
-      |> to_proto_response
-
-    {:ok, data}
+    case type do
+      :json -> Poison.encode(data)
+      :protobuf -> {:ok, encode_protobuf(data)}
+      _ -> {:error, :not_supported}
+    end
   end
 
   defp build_row(row) do
@@ -104,8 +104,8 @@ defmodule Derivcotest.FootballMatches do
     end
   end
 
-  @spec to_proto_response(%{ String.t() => List.t() }) :: binary
-  defp to_proto_response(groups) when is_map(groups) do
+  @spec encode_protobuf(%{ String.t() => List.t() }) :: binary
+  defp encode_protobuf(groups) when is_map(groups) do
     groups = Enum.map(groups, fn {name, games} ->
       Messages.GroupMatches.new(%{
         name: name,
@@ -120,8 +120,8 @@ defmodule Derivcotest.FootballMatches do
     )
   end
 
-  @spec to_proto_response([Map.t()]) :: binary
-  defp to_proto_response(rows) when is_list(rows) do
+  @spec encode_protobuf([Map.t()]) :: binary
+  defp encode_protobuf(rows) when is_list(rows) do
     Messages.Response.encode(games_to_proto(rows))
   end
 

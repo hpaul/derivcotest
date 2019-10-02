@@ -61,7 +61,8 @@ defmodule Derivcotest.Router do
         params -> params
       end
 
-    with {:ok, data} <- FootballMatches.get(filters) |> Poison.encode do
+    with {:ok, data} <- FootballMatches.get(filters, :json) do
+      put_resp_header(conn, "content-type", "application/json")
       send_resp(conn, 200, data)
     else
       {:error, message} ->
@@ -82,7 +83,8 @@ defmodule Derivcotest.Router do
         params -> params
       end
 
-    with {:ok, data} <- FootballMatches.get_proto(filters) do
+    with {:ok, data} <- FootballMatches.get(filters, :protobuf) do
+      put_resp_header(conn, "content-type", "application/protobuf")
       send_resp(conn, 200, data)
     else
       {:error, message} ->
